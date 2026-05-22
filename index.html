@@ -20,13 +20,12 @@
       --gray:  #9aa3b2;
     }
 
-    html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Lato', sans-serif;
       background: var(--black);
       color: var(--white);
-      overflow-x: hidden;
+      overflow: hidden;
+      height: 100vh;
     }
 
     /* ── NAV ── */
@@ -72,11 +71,19 @@
 
     .nav-links a:hover { opacity: 1; color: var(--gold-light); }
 
+    @keyframes kenburns {
+      0%   { transform: scale(1.08) translate(0%,    0%);    }
+      25%  { transform: scale(1.13) translate(-1.5%, 0.8%);  }
+      50%  { transform: scale(1.1)  translate(1%,   -0.8%);  }
+      75%  { transform: scale(1.13) translate(-0.5%, 1.2%);  }
+      100% { transform: scale(1.08) translate(0%,    0%);    }
+    }
+
     /* ── HERO ── */
     .hero {
-      position: relative;
-      height: 100vh;
-      min-height: 600px;
+      position: fixed;
+      inset: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -92,11 +99,8 @@
       background-size: cover;
       background-position: center;
       filter: brightness(0.45) saturate(1.1);
-      transform: scale(1.04);
-      transition: transform 8s ease-out;
+      animation: kenburns 24s ease-in-out infinite;
     }
-
-    .hero:hover .hero-bg { transform: scale(1); }
 
     .hero-overlay {
       position: absolute;
@@ -201,31 +205,26 @@
       box-shadow: 0 8px 24px rgba(201,150,26,0.45);
     }
 
-    .scroll-hint {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-      opacity: 0.45;
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    .scroll-hint span { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; }
-
-    .scroll-hint svg { width: 18px; height: 18px; }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50%       { transform: translateX(-50%) translateY(6px); }
-    }
 
     /* ── SECTIONS SHARED ── */
-    section { padding: 6rem 2rem; }
+    section {
+      position: fixed;
+      inset: 0;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1;
+      padding: 6rem 2rem 4rem;
+    }
+
+    section.active {
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .nav-links a.nav-active { opacity: 1; color: var(--gold-light); }
 
     .section-inner {
       max-width: 1100px;
@@ -349,6 +348,105 @@
 
     /* ── EVENTS ── */
     #events { background: var(--black); }
+
+    /* ── OFFICERS ── */
+    #officers { background: var(--navy); }
+
+    .officers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 5rem;
+    }
+
+    .officer-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      padding: 1.6rem 1.4rem;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .officer-card:hover {
+      border-color: rgba(201,150,26,0.45);
+      transform: translateY(-3px);
+    }
+
+    .officer-card--featured {
+      border-color: rgba(201,150,26,0.35);
+      background: rgba(201,150,26,0.07);
+    }
+
+    .officer-role {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .officer-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.3;
+    }
+
+    .prev-officers-header { margin-bottom: 2rem; }
+
+    .prev-terms {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .prev-term {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 1.6rem;
+    }
+
+    .prev-term-year {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold-light);
+      margin-bottom: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(201,150,26,0.2);
+    }
+
+    .prev-term-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .prev-term-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+    }
+
+    .prev-role {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    .prev-name {
+      color: var(--white);
+      text-align: right;
+    }
 
     .events-grid {
       display: grid;
@@ -681,17 +779,18 @@
 
   <!-- NAV -->
   <nav>
-    <a class="nav-brand" href="#">ADNU H.S. '93</a>
+    <a class="nav-brand" href="#home">ADNU H.S. '93</a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#events">Events</a></li>
+      <li><a href="#officers">Officers</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#connect">Connect</a></li>
     </ul>
   </nav>
 
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero active" id="home">
     <div class="hero-bg"></div>
     <div class="hero-overlay"></div>
 
@@ -707,12 +806,6 @@
       <a class="hero-cta" href="#connect">Join the Batch</a>
     </div>
 
-    <div class="scroll-hint">
-      <span>Scroll</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 5v14M5 12l7 7 7-7"/>
-      </svg>
-    </div>
   </section>
 
   <!-- ABOUT -->
@@ -739,7 +832,7 @@
             </div>
             <div class="stat-item">
               <span class="stat-num">ADNU</span>
-              <span class="stat-lbl">Always Knights</span>
+              <span class="stat-lbl">One '93 #One93</span>
             </div>
           </div>
         </div>
@@ -786,6 +879,91 @@
           <h3 class="event-title">Batch '93 Online Directory</h3>
           <p class="event-desc">We're building a complete registry of Batch '93 batchmates worldwide. Help us locate everyone — fill in your details and spread the word to classmates you're still in touch with.</p>
           <span class="event-badge">Active</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFICERS -->
+  <section id="officers">
+    <div class="section-inner">
+
+      <!-- Current Officers -->
+      <p class="section-label">Leadership</p>
+      <h2 class="section-title">Current Officers</h2>
+      <div class="section-rule"></div>
+
+      <div class="officers-grid">
+        <div class="officer-card officer-card--featured">
+          <div class="officer-role">President</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+        <div class="officer-card">
+          <div class="officer-role">Vice President</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+        <div class="officer-card">
+          <div class="officer-role">Secretary</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+        <div class="officer-card">
+          <div class="officer-role">Treasurer</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+        <div class="officer-card">
+          <div class="officer-role">Auditor</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+        <div class="officer-card">
+          <div class="officer-role">PRO</div>
+          <div class="officer-name">— To be updated —</div>
+        </div>
+      </div>
+
+      <!-- Previous Officers -->
+      <div class="prev-officers-header">
+        <p class="section-label" style="margin-top:0;">Alumni Leadership</p>
+        <h2 class="section-title">Previous Officers</h2>
+        <div class="section-rule"></div>
+      </div>
+
+      <div class="prev-terms">
+
+        <div class="prev-term">
+          <div class="prev-term-year">Term · 20XX – 20XX</div>
+          <ul class="prev-term-list">
+            <li><span class="prev-role">President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Vice President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Secretary</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Treasurer</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Auditor</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">PRO</span><span class="prev-name">— To be updated —</span></li>
+          </ul>
+        </div>
+
+        <div class="prev-term">
+          <div class="prev-term-year">Term · 20XX – 20XX</div>
+          <ul class="prev-term-list">
+            <li><span class="prev-role">President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Vice President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Secretary</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Treasurer</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Auditor</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">PRO</span><span class="prev-name">— To be updated —</span></li>
+          </ul>
+        </div>
+
+        <div class="prev-term">
+          <div class="prev-term-year">Term · 20XX – 20XX</div>
+          <ul class="prev-term-list">
+            <li><span class="prev-role">President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Vice President</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Secretary</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Treasurer</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">Auditor</span><span class="prev-name">— To be updated —</span></li>
+            <li><span class="prev-role">PRO</span><span class="prev-name">— To be updated —</span></li>
+          </ul>
         </div>
 
       </div>
@@ -916,20 +1094,21 @@
 
       </div>
     </div>
-  </section>
 
-  <!-- FOOTER -->
-  <footer>
+    <!-- FOOTER -->
+    <footer>
     <p class="footer-logo">ADNU H.S. BATCH '93</p>
     <p class="footer-sub">Ateneo de Naga University · Blue Knights Forever</p>
     <ul class="footer-nav">
       <li><a href="#about">About</a></li>
       <li><a href="#events">Events</a></li>
+      <li><a href="#officers">Officers</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#connect">Connect</a></li>
     </ul>
     <p class="footer-copy">© 2025 ADNU High School Batch '93 · Ad Majorem Dei Gloriam</p>
-  </footer>
+    </footer>
+  </section>
 
   <script>
     function handleSubmit(e) {
@@ -944,14 +1123,31 @@
       }, 3000);
     }
 
-    // Parallax nudge on hero bg
-    window.addEventListener('scroll', () => {
-      const bg = document.querySelector('.hero-bg');
-      if (bg) {
-        const y = window.scrollY * 0.3;
-        bg.style.transform = `scale(1.04) translateY(${y}px)`;
-      }
-    }, { passive: true });
+    function showSection(hash) {
+      if (!hash || hash === '#') hash = '#home';
+      const target = document.querySelector(hash);
+      if (!target) return;
+
+      document.querySelectorAll('section').forEach(s => {
+        s.classList.remove('active');
+        s.scrollTop = 0;
+      });
+      target.classList.add('active');
+
+      document.querySelectorAll('.nav-links a').forEach(a => {
+        a.classList.toggle('nav-active', a.getAttribute('href') === hash);
+      });
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const href = link.getAttribute('href');
+        if (href && href.length > 1) {
+          e.preventDefault();
+          showSection(href);
+        }
+      });
+    });
   </script>
 
 </body>
