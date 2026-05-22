@@ -1862,11 +1862,10 @@
         setAuthError('');
         const cred = await auth.createUserWithEmailAndPassword(email, password);
         await cred.user.updateProfile({ displayName: name });
-        const isAdmin = email === ADMIN_EMAIL;
         await db.collection('users').doc(cred.user.uid).set({
           name, email, section,
-          status: isAdmin ? 'approved' : 'pending',
-          role:   isAdmin ? 'admin'    : 'member',
+          status: 'pending',
+          role: 'member',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       } catch (e) { setAuthError(e.message); }
@@ -1891,13 +1890,12 @@
       let snap = await userRef.get();
 
       if (!snap.exists) {
-        const isAdmin = user.email === ADMIN_EMAIL;
         await userRef.set({
           name: user.displayName || user.email,
           email: user.email,
           section: '',
-          status: isAdmin ? 'approved' : 'pending',
-          role:   isAdmin ? 'admin'    : 'member',
+          status: 'pending',
+          role:   'member',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         snap = await userRef.get();
