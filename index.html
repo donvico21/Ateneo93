@@ -211,6 +211,7 @@
       position: fixed;
       inset: 0;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.5s ease;
@@ -754,24 +755,119 @@
       color: rgba(255,255,255,0.2);
     }
 
+    /* ── HAMBURGER ── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.4rem;
+      z-index: 110;
+    }
+
+    .nav-hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       nav { padding: 0 1.2rem; }
-      .nav-links { gap: 1.2rem; }
-      .nav-links a { font-size: 0.72rem; }
 
-      .about-grid,
-      .connect-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .nav-hamburger { display: flex; }
 
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-      .gallery-item:first-child { grid-column: span 2; }
+      .nav-links {
+        position: fixed;
+        top: 64px; left: 0; right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background: rgba(8, 12, 20, 0.97);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(201,150,26,0.25);
+        padding: 0.5rem 0 1rem;
+        z-index: 99;
+        transform: translateY(-110%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.35s ease, opacity 0.3s ease;
+      }
 
-      .stat-row { flex-wrap: wrap; justify-content: center; }
+      .nav-links.menu-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .nav-links li { width: 100%; }
+
+      .nav-links a {
+        display: block;
+        padding: 0.9rem 2rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.12em;
+        opacity: 1;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+
+      .nav-links a:last-child { border-bottom: none; }
+
+      /* Hero */
+      .hero-title { font-size: clamp(1.8rem, 7vw, 3rem); }
+      .hero-tagline { font-size: 0.9rem; padding: 0 1rem; }
+      .hero-cta { font-size: 0.78rem; padding: 0.75rem 1.8rem; }
+
+      /* Sections */
+      section { padding: 5rem 1.2rem 3rem; }
+
+      /* About */
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .motto-card { padding: 1.8rem 1.2rem; }
+      .stat-row { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+
+      /* Events */
+      .events-grid { grid-template-columns: 1fr; }
+
+      /* Officers */
+      .officers-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .prev-terms { grid-template-columns: 1fr; }
+
+      /* Gallery */
+      .gallery-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+      }
+      .gallery-item:first-child {
+        grid-column: span 2;
+        aspect-ratio: 16/7;
+      }
+
+      /* Connect */
+      .connect-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .btn-submit { width: 100%; text-align: center; align-self: stretch; }
+
+      /* Footer */
+      footer { padding: 2rem 1rem; }
+      .footer-nav { gap: 1rem; }
     }
 
-    @media (max-width: 480px) {
-      .nav-links { display: none; }
-      .gallery-grid { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 420px) {
+      .officers-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-item:first-child { grid-column: span 1; aspect-ratio: 16/9; }
+      .hero-title { font-size: clamp(1.5rem, 8vw, 2.2rem); }
+      .nav-brand { font-size: 0.95rem; }
     }
   </style>
 </head>
@@ -780,7 +876,10 @@
   <!-- NAV -->
   <nav>
     <a class="nav-brand" href="#home">ADNU H.S. '93</a>
-    <ul class="nav-links">
+    <button class="nav-hamburger" id="menuBtn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
       <li><a href="#about">About</a></li>
       <li><a href="#events">Events</a></li>
       <li><a href="#officers">Officers</a></li>
@@ -1123,6 +1222,20 @@
       }, 3000);
     }
 
+    const menuBtn   = document.getElementById('menuBtn');
+    const navLinks  = document.getElementById('navLinks');
+
+    function closeMenu() {
+      menuBtn.classList.remove('open');
+      navLinks.classList.remove('menu-open');
+    }
+
+    menuBtn.addEventListener('click', () => {
+      const opening = !navLinks.classList.contains('menu-open');
+      menuBtn.classList.toggle('open', opening);
+      navLinks.classList.toggle('menu-open', opening);
+    });
+
     function showSection(hash) {
       if (!hash || hash === '#') hash = '#home';
       const target = document.querySelector(hash);
@@ -1137,6 +1250,8 @@
       document.querySelectorAll('.nav-links a').forEach(a => {
         a.classList.toggle('nav-active', a.getAttribute('href') === hash);
       });
+
+      closeMenu();
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(link => {
