@@ -1303,7 +1303,7 @@
       <li><a href="#officers">Officers</a></li>
       <li><a href="#members">Sections</a></li>
       <li><a href="#gallery">Gallery</a></li>
-      <li id="nav-li-signin"><a href="#" onclick="event.preventDefault(); document.getElementById('auth-overlay').style.display='flex'">Sign In / Register</a></li>
+      <li id="nav-li-signin"><a href="#connect">Sign In / Register</a></li>
       <li id="nav-li-signout" style="display:none"><a href="#" onclick="event.preventDefault(); doSignOut()">Sign Out</a></li>
     </ul>
   </nav>
@@ -1626,7 +1626,49 @@
 
       <div class="connect-grid">
 
-        <form class="connect-form" onsubmit="handleSubmit(event)">
+        <!-- Auth form: shown when not logged in -->
+        <div id="connect-auth">
+          <div class="auth-tabs" style="margin-bottom:1.5rem;">
+            <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+            <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+          </div>
+          <button class="btn-google" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+          <div class="auth-divider"><span>or</span></div>
+          <form id="form-signin" onsubmit="signInEmail(event)">
+            <div class="auth-field"><input type="email" id="si-email" placeholder="Email address" required /></div>
+            <div class="auth-field"><input type="password" id="si-password" placeholder="Password" required /></div>
+            <button type="submit" class="btn-auth">Sign In</button>
+          </form>
+          <form id="form-register" style="display:none" onsubmit="registerEmail(event)">
+            <div class="auth-field"><input type="text" id="reg-name" placeholder="Full name" required /></div>
+            <div class="auth-field"><input type="email" id="reg-email" placeholder="Email address" required /></div>
+            <div class="auth-field"><input type="password" id="reg-password" placeholder="Password (min. 6 characters)" required minlength="6" /></div>
+            <div class="auth-field">
+              <select id="reg-section">
+                <option value="">Section (optional)</option>
+                <option value="X">LG 4X</option>
+                <option value="A">LG 4A</option>
+                <option value="V">LG 4V</option>
+                <option value="I">LG 4I</option>
+                <option value="E">LG 4E</option>
+                <option value="R">LG 4R</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-auth">Register</button>
+          </form>
+          <p id="auth-error" class="auth-error"></p>
+        </div>
+
+        <!-- Contact form: shown when logged in -->
+        <form id="connect-contact" class="connect-form" style="display:none" onsubmit="handleSubmit(event)">
           <div class="form-group">
             <label for="name">Full Name</label>
             <input type="text" id="name" placeholder="Your name" required />
@@ -1700,52 +1742,6 @@
     </footer>
   </section>
 
-  <!-- AUTH OVERLAY -->
-  <div class="auth-overlay" id="auth-overlay">
-    <div class="auth-box">
-      <div class="auth-logo">ADNU H.S. '93</div>
-      <p class="auth-subtitle">Batchmates Only</p>
-      <div class="auth-rule"></div>
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
-        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
-      </div>
-      <button class="btn-google" onclick="signInWithGoogle()">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-      <div class="auth-divider"><span>or</span></div>
-      <form id="form-signin" onsubmit="signInEmail(event)">
-        <div class="auth-field"><input type="email" id="si-email" placeholder="Email address" required /></div>
-        <div class="auth-field"><input type="password" id="si-password" placeholder="Password" required /></div>
-        <button type="submit" class="btn-auth">Sign In</button>
-      </form>
-      <form id="form-register" style="display:none" onsubmit="registerEmail(event)">
-        <div class="auth-field"><input type="text" id="reg-name" placeholder="Full name" required /></div>
-        <div class="auth-field"><input type="email" id="reg-email" placeholder="Email address" required /></div>
-        <div class="auth-field"><input type="password" id="reg-password" placeholder="Password (min. 6 characters)" required minlength="6" /></div>
-        <div class="auth-field">
-          <select id="reg-section">
-            <option value="">Section (optional)</option>
-            <option value="X">LG 4X</option>
-            <option value="A">LG 4A</option>
-            <option value="V">LG 4V</option>
-            <option value="I">LG 4I</option>
-            <option value="E">LG 4E</option>
-            <option value="R">LG 4R</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-auth">Register</button>
-      </form>
-      <p id="auth-error" class="auth-error"></p>
-    </div>
-  </div>
-
   <!-- PENDING OVERLAY -->
   <div class="auth-overlay" id="pending-overlay" style="display:none">
     <div class="auth-box">
@@ -1813,15 +1809,24 @@
     }
 
     function hideOverlays() {
-      document.getElementById('auth-overlay').style.display    = 'none';
       document.getElementById('pending-overlay').style.display = 'none';
+    }
+
+    function showConnectAuth() {
+      document.getElementById('connect-auth').style.display    = '';
+      document.getElementById('connect-contact').style.display = 'none';
+    }
+
+    function showConnectForm() {
+      document.getElementById('connect-auth').style.display    = 'none';
+      document.getElementById('connect-contact').style.display = '';
     }
 
     function requireAuthThenUpload() {
       if (auth.currentUser) {
         document.getElementById('photoUpload').click();
       } else {
-        document.getElementById('auth-overlay').style.display = 'flex';
+        showSection('#connect');
       }
     }
 
@@ -1875,6 +1880,7 @@
     auth.onAuthStateChanged(async user => {
       if (!user) {
         hideOverlays();
+        showConnectAuth();
         document.getElementById('nav-user').style.display      = 'none';
         document.getElementById('nav-li-signin').style.display  = '';
         document.getElementById('nav-li-signout').style.display = 'none';
@@ -1901,20 +1907,21 @@
 
       if (ud.status === 'pending') {
         document.getElementById('pending-overlay').style.display = 'flex';
-        document.getElementById('auth-overlay').style.display    = 'none';
         document.getElementById('nav-li-signin').style.display   = 'none';
         return;
       }
 
       if (ud.status === 'rejected') {
         setAuthError('Your registration was not approved. Please contact the batch admin.');
-        document.getElementById('auth-overlay').style.display = 'flex';
+        showConnectAuth();
+        showSection('#connect');
         auth.signOut();
         return;
       }
 
       /* ── Approved ── */
       hideOverlays();
+      showConnectForm();
       document.getElementById('nav-li-signin').style.display  = 'none';
       document.getElementById('nav-li-signout').style.display = '';
       const navUser = document.getElementById('nav-user');
