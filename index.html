@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -95,7 +99,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background-image: url('banner.jpg');
+      background-image: url('gallery/banner.jpg');
       background-size: cover;
       background-position: center;
       filter: brightness(0.45) saturate(1.1);
@@ -516,6 +520,108 @@
       color: var(--gold);
     }
 
+    /* ── MEMBERS ── */
+    #members { background: var(--black); }
+
+    .members-intro {
+      font-size: 1rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--gray);
+      margin-bottom: 2.5rem;
+      max-width: 620px;
+    }
+
+    .members-intro strong { color: var(--gold-light); }
+
+    .lg-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .lg-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lg-btn:hover {
+      border-color: rgba(201,150,26,0.5);
+      color: var(--gold-light);
+      background: rgba(201,150,26,0.08);
+    }
+
+    .lg-btn.active {
+      border-color: var(--gold);
+      color: var(--gold-light);
+      background: rgba(201,150,26,0.12);
+      box-shadow: 0 0 20px rgba(201,150,26,0.2);
+    }
+
+    .lg-panel { display: none; }
+    .lg-panel.active { display: block; }
+
+    .lg-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+
+    .lg-panel-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    .lg-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .lg-name-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 0.85rem 1.1rem;
+      font-size: 0.92rem;
+      color: var(--white);
+      font-weight: 300;
+      letter-spacing: 0.03em;
+      transition: border-color 0.2s;
+    }
+
+    .lg-name-card:hover { border-color: rgba(201,150,26,0.35); }
+
+    .lg-empty {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.2);
+      font-style: italic;
+      letter-spacing: 0.08em;
+      padding: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .lg-btn { width: 52px; height: 52px; font-size: 1.6rem; }
+    }
+
     /* ── GALLERY ── */
     #gallery { background: var(--navy); }
 
@@ -755,6 +861,51 @@
       color: rgba(255,255,255,0.2);
     }
 
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0,0,0,0.93);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 88vh;
+      object-fit: contain;
+      box-shadow: 0 8px 64px rgba(0,0,0,0.9);
+      border: 1px solid rgba(201,150,26,0.25);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      font-size: 2.2rem;
+      line-height: 1;
+      color: var(--white);
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .lightbox-close:hover { opacity: 1; }
+
     /* ── HAMBURGER ── */
     .nav-hamburger {
       display: none;
@@ -869,6 +1020,269 @@
       .hero-title { font-size: clamp(1.5rem, 8vw, 2.2rem); }
       .nav-brand { font-size: 0.95rem; }
     }
+    /* ── AUTH OVERLAY ── */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(8,12,20,0.97);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(13,27,62,0.7);
+      border: 1px solid rgba(201,150,26,0.3);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .auth-box::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 10%; right: 10%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .auth-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.15em;
+      margin-bottom: 0.3rem;
+    }
+
+    .auth-subtitle {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-rule {
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 0 auto 1.5rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: rgba(201,150,26,0.15);
+      color: var(--gold-light);
+    }
+
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--white);
+      font-family: 'Lato', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 1.2rem;
+    }
+
+    .btn-google:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+    .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.72rem;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .auth-field { margin-bottom: 0.7rem; text-align: left; }
+
+    .auth-field input, .auth-field select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--white);
+      padding: 0.7rem 0.9rem;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .auth-field input:focus, .auth-field select:focus { border-color: var(--gold); }
+    .auth-field input::placeholder { color: rgba(255,255,255,0.25); }
+    .auth-field select option { background: var(--navy); }
+
+    .btn-auth {
+      width: 100%;
+      padding: 0.8rem;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-auth:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .auth-error {
+      color: #f87171;
+      font-size: 0.82rem;
+      margin-top: 0.75rem;
+      min-height: 1.2rem;
+    }
+
+    .auth-message {
+      font-size: 0.92rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── ADMIN PANEL ── */
+    .admin-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: var(--black);
+      overflow-y: auto;
+      padding: 5rem 2rem 3rem;
+      display: none;
+    }
+
+    .admin-panel.open { display: block; }
+
+    .admin-section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 2rem 0 1rem;
+    }
+
+    .admin-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.2rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 0.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .admin-user-name { font-size: 0.95rem; color: var(--white); font-weight: 700; }
+    .admin-user-email { font-size: 0.78rem; color: var(--gray); }
+    .admin-user-section { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+
+    .admin-user-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+    .btn-approve {
+      padding: 0.35rem 0.9rem;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.4); color: #4ade80;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-approve:hover { background: rgba(74,222,128,0.22); }
+
+    .btn-reject {
+      padding: 0.35rem 0.9rem;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.4); color: #f87171;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-reject:hover { background: rgba(248,113,113,0.22); }
+
+    /* ── NAV USER ── */
+    .nav-user {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      margin-left: auto;
+      margin-right: 1rem;
+    }
+
+    .nav-user-name {
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-nav-sm {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--gray);
+      padding: 0.28rem 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-nav-sm:hover { border-color: var(--gold); color: var(--gold-light); }
+    .btn-nav-sm.admin { border-color: rgba(201,150,26,0.4); color: var(--gold); }
+
+    @media (max-width: 768px) {
+      .nav-user-name { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -876,6 +1290,11 @@
   <!-- NAV -->
   <nav>
     <a class="nav-brand" href="#home">ADNU H.S. '93</a>
+    <div class="nav-user" id="nav-user">
+      <span class="nav-user-name" id="nav-user-name"></span>
+      <button class="btn-nav-sm admin" id="btn-admin" style="display:none" onclick="openAdminPanel()">Admin</button>
+      <button class="btn-nav-sm" onclick="doSignOut()">Sign Out</button>
+    </div>
     <button class="nav-hamburger" id="menuBtn" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -883,6 +1302,7 @@
       <li><a href="#about">About</a></li>
       <li><a href="#events">Events</a></li>
       <li><a href="#officers">Officers</a></li>
+      <li><a href="#members">Sections</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#connect">Connect</a></li>
     </ul>
@@ -916,9 +1336,9 @@
           <p class="section-label">Who We Are</p>
           <h2 class="section-title">The ADNU Knights<br/>of '93</h2>
           <div class="section-rule"></div>
-          <p>We are the <strong>High School graduating class of 1993</strong> of Ateneo de Naga University — a brotherhood of men shaped by Jesuit tradition, the spirit of the Blue Knights, and the hills of Naga City.</p>
+          <p>We are the <strong>High School graduating class of 1993</strong> of Ateneo de Naga University — a brotherhood shaped by Jesuit tradition, the spirit of the Golden Knights, and the heart of the Bicol region.</p>
           <p>More than three decades on, the bonds of Batch '93 remain unbreakable. From classrooms and corridors to careers and families across the globe, these brothers carry the <strong>ADNU spirit</strong> wherever they go.</p>
-          <p><em>"Ad Majorem Dei Gloriam"</em> — to the greater glory of God — the motto that guided us then and continues to inspire us now.</p>
+          <p><em>"Ad Majorem Dei Gloriam"</em> — for the greater glory of God — the motto that guided us then and continues to inspire us now. Above all, we are called to be <em>Men and Women for Others</em>.</p>
 
           <div class="stat-row">
             <div class="stat-item">
@@ -1069,6 +1489,74 @@
     </div>
   </section>
 
+  <!-- MEMBERS -->
+  <section id="members">
+    <div class="section-inner">
+      <p class="section-label">Class Roster</p>
+      <h2 class="section-title">The Sections of '93</h2>
+      <div class="section-rule"></div>
+      <p class="members-intro">In our senior year, Batch '93 was organized into six Learning Groups spelling <strong>XAVIER</strong> — a tribute to St. Francis Xavier and the Jesuit spirit that defined us. Select a section to view its members.</p>
+
+      <div class="lg-selector">
+        <button class="lg-btn active" data-lg="X">X</button>
+        <button class="lg-btn" data-lg="A">A</button>
+        <button class="lg-btn" data-lg="V">V</button>
+        <button class="lg-btn" data-lg="I">I</button>
+        <button class="lg-btn" data-lg="E">E</button>
+        <button class="lg-btn" data-lg="R">R</button>
+      </div>
+
+      <div id="lg-X" class="lg-panel active">
+        <p class="lg-panel-title">LG 4X</p>
+        <p class="lg-panel-label">Learning Group · 4th Year Xavier</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+      <div id="lg-A" class="lg-panel">
+        <p class="lg-panel-title">LG 4A</p>
+        <p class="lg-panel-label">Learning Group · 4th Year A</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+      <div id="lg-V" class="lg-panel">
+        <p class="lg-panel-title">LG 4V</p>
+        <p class="lg-panel-label">Learning Group · 4th Year V</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+      <div id="lg-I" class="lg-panel">
+        <p class="lg-panel-title">LG 4I</p>
+        <p class="lg-panel-label">Learning Group · 4th Year I</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+      <div id="lg-E" class="lg-panel">
+        <p class="lg-panel-title">LG 4E</p>
+        <p class="lg-panel-label">Learning Group · 4th Year E</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+      <div id="lg-R" class="lg-panel">
+        <p class="lg-panel-title">LG 4R</p>
+        <p class="lg-panel-label">Learning Group · 4th Year R</p>
+        <div class="lg-roster">
+          <p class="lg-empty">Names to be added.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- GALLERY -->
   <section id="gallery">
     <div class="section-inner">
@@ -1080,16 +1568,16 @@
 
         <!-- Featured slot: banner image -->
         <div class="gallery-item">
-          <img src="banner.jpg" alt="ADNU HS Batch 93 Banner" />
+          <img src="gallery/banner.jpg" alt="ADNU HS Batch 93 Banner" />
         </div>
 
         <!-- Batch photos -->
         <div class="gallery-item">
-          <img src="vandals.jpg" alt="Batch '93 Vandals Wall" />
+          <img src="gallery/vandals.jpg" alt="Batch '93 Vandals Wall" />
           <div class="gallery-caption">The Vandals Wall</div>
         </div>
         <div class="gallery-item">
-          <img src="reunion 2005.jpg" alt="Batch '93 Reunion 2005" />
+          <img src="gallery/reunion 2005.jpg" alt="Batch '93 Reunion 2005" />
           <div class="gallery-caption">Reunion 2005</div>
         </div>
         <div class="gallery-item">
@@ -1123,7 +1611,8 @@
       </div>
 
       <div class="gallery-cta">
-        <a class="hero-cta" href="#connect" style="margin-top:0;">Share Your Photos</a>
+        <button class="hero-cta" style="margin-top:0;" onclick="document.getElementById('photoUpload').click()">Share Your Photos</button>
+        <input type="file" id="photoUpload" accept="image/*" multiple style="display:none" />
       </div>
     </div>
   </section>
@@ -1147,14 +1636,15 @@
             <input type="email" id="email" placeholder="your@email.com" required />
           </div>
           <div class="form-group">
-            <label for="section">Section (if you remember!)</label>
+            <label for="section">Section</label>
             <select id="section">
               <option value="">— Select your section —</option>
-              <option>St. Ignatius</option>
-              <option>St. Francis Xavier</option>
-              <option>St. Peter Canisius</option>
-              <option>St. Aloysius</option>
-              <option>Other / I forget</option>
+              <option value="X">X</option>
+              <option value="A">A</option>
+              <option value="V">V</option>
+              <option value="I">I</option>
+              <option value="E">E</option>
+              <option value="R">R</option>
             </select>
           </div>
           <div class="form-group">
@@ -1197,11 +1687,12 @@
     <!-- FOOTER -->
     <footer>
     <p class="footer-logo">ADNU H.S. BATCH '93</p>
-    <p class="footer-sub">Ateneo de Naga University · Blue Knights Forever</p>
+    <p class="footer-sub">Ateneo de Naga University · Golden Knights Forever</p>
     <ul class="footer-nav">
       <li><a href="#about">About</a></li>
       <li><a href="#events">Events</a></li>
       <li><a href="#officers">Officers</a></li>
+      <li><a href="#members">Sections</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#connect">Connect</a></li>
     </ul>
@@ -1209,7 +1700,361 @@
     </footer>
   </section>
 
+  <!-- AUTH OVERLAY -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-box">
+      <div class="auth-logo">ADNU H.S. '93</div>
+      <p class="auth-subtitle">Batchmates Only</p>
+      <div class="auth-rule"></div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      <button class="btn-google" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider"><span>or</span></div>
+      <form id="form-signin" onsubmit="signInEmail(event)">
+        <div class="auth-field"><input type="email" id="si-email" placeholder="Email address" required /></div>
+        <div class="auth-field"><input type="password" id="si-password" placeholder="Password" required /></div>
+        <button type="submit" class="btn-auth">Sign In</button>
+      </form>
+      <form id="form-register" style="display:none" onsubmit="registerEmail(event)">
+        <div class="auth-field"><input type="text" id="reg-name" placeholder="Full name" required /></div>
+        <div class="auth-field"><input type="email" id="reg-email" placeholder="Email address" required /></div>
+        <div class="auth-field"><input type="password" id="reg-password" placeholder="Password (min. 6 characters)" required minlength="6" /></div>
+        <div class="auth-field">
+          <select id="reg-section">
+            <option value="">Section (optional)</option>
+            <option value="X">LG 4X</option>
+            <option value="A">LG 4A</option>
+            <option value="V">LG 4V</option>
+            <option value="I">LG 4I</option>
+            <option value="E">LG 4E</option>
+            <option value="R">LG 4R</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-auth">Register</button>
+      </form>
+      <p id="auth-error" class="auth-error"></p>
+    </div>
+  </div>
+
+  <!-- PENDING OVERLAY -->
+  <div class="auth-overlay" id="pending-overlay" style="display:none">
+    <div class="auth-box">
+      <div class="auth-logo">ADNU H.S. '93</div>
+      <p class="auth-subtitle">Awaiting Approval</p>
+      <div class="auth-rule"></div>
+      <p class="auth-message">Your registration has been received. The batch admin will review and approve your access shortly.</p>
+      <button class="btn-auth" onclick="doSignOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="admin-panel" id="admin-panel">
+    <div style="max-width:900px;margin:0 auto;">
+      <p class="section-label">Admin</p>
+      <h2 class="section-title">Member Approvals</h2>
+      <div class="section-rule"></div>
+      <p class="admin-section-title" style="margin-top:0;">Pending Registration</p>
+      <div id="admin-pending-list"><p class="lg-empty">No pending registrations.</p></div>
+      <p class="admin-section-title">Approved Members</p>
+      <div id="admin-approved-list"><p class="lg-empty">No approved members yet.</p></div>
+      <button class="btn-nav-sm" onclick="closeAdminPanel()" style="margin-top:2rem;">← Close</button>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+  </div>
+
   <script>
+    /* ─────────────────────────────────────────
+       FIREBASE CONFIG
+    ───────────────────────────────────────── */
+    const firebaseConfig = {
+      apiKey: "AIzaSyB__KTPwUvIv1w4Xv3IFfwKfHL3ZQQ2Y-M",
+      authDomain: "ateneo93-57612.firebaseapp.com",
+      projectId: "ateneo93-57612",
+      storageBucket: "ateneo93-57612.firebasestorage.app",
+      messagingSenderId: "791425204858",
+      appId: "1:791425204858:web:13a8c8c7bb2e3e3309f1c3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth    = firebase.auth();
+    const db      = firebase.firestore();
+    const storage = firebase.storage();
+
+    /* ── Set this to your email address to get admin access ── */
+    const ADMIN_EMAIL = 'donvico21@gmail.com';
+
+    /* ─────────────────────────────────────────
+       AUTH UI HELPERS
+    ───────────────────────────────────────── */
+    function switchAuthTab(tab) {
+      document.getElementById('form-signin').style.display   = tab === 'signin'   ? '' : 'none';
+      document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+      document.getElementById('tab-signin').classList.toggle('active',   tab === 'signin');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('auth-error').textContent = '';
+    }
+
+    function setAuthError(msg) {
+      document.getElementById('auth-error').textContent = msg;
+    }
+
+    function showAuthOverlay() {
+      document.getElementById('auth-overlay').style.display    = 'flex';
+      document.getElementById('pending-overlay').style.display = 'none';
+      document.getElementById('nav-user').style.display        = 'none';
+    }
+
+    function showPendingOverlay() {
+      document.getElementById('auth-overlay').style.display    = 'none';
+      document.getElementById('pending-overlay').style.display = 'flex';
+      document.getElementById('nav-user').style.display        = 'none';
+    }
+
+    function hideOverlays() {
+      document.getElementById('auth-overlay').style.display    = 'none';
+      document.getElementById('pending-overlay').style.display = 'none';
+    }
+
+    /* ─────────────────────────────────────────
+       AUTH ACTIONS
+    ───────────────────────────────────────── */
+    async function signInWithGoogle() {
+      try {
+        setAuthError('');
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (e) { setAuthError(e.message); }
+    }
+
+    async function signInEmail(e) {
+      e.preventDefault();
+      try {
+        setAuthError('');
+        await auth.signInWithEmailAndPassword(
+          document.getElementById('si-email').value.trim(),
+          document.getElementById('si-password').value
+        );
+      } catch (e) { setAuthError(e.message); }
+    }
+
+    async function registerEmail(e) {
+      e.preventDefault();
+      const name     = document.getElementById('reg-name').value.trim();
+      const email    = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const section  = document.getElementById('reg-section').value;
+      try {
+        setAuthError('');
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName: name });
+        const isAdmin = email === ADMIN_EMAIL;
+        await db.collection('users').doc(cred.user.uid).set({
+          name, email, section,
+          status: isAdmin ? 'approved' : 'pending',
+          role:   isAdmin ? 'admin'    : 'member',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (e) { setAuthError(e.message); }
+    }
+
+    function doSignOut() { auth.signOut(); }
+
+    /* ─────────────────────────────────────────
+       AUTH STATE LISTENER  — drives everything
+    ───────────────────────────────────────── */
+    auth.onAuthStateChanged(async user => {
+      if (!user) { showAuthOverlay(); return; }
+
+      const userRef = db.collection('users').doc(user.uid);
+      let snap = await userRef.get();
+
+      if (!snap.exists) {
+        const isAdmin = user.email === ADMIN_EMAIL;
+        await userRef.set({
+          name: user.displayName || user.email,
+          email: user.email,
+          section: '',
+          status: isAdmin ? 'approved' : 'pending',
+          role:   isAdmin ? 'admin'    : 'member',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        snap = await userRef.get();
+      }
+
+      const ud = snap.data();
+
+      if (ud.status === 'pending') { showPendingOverlay(); return; }
+
+      if (ud.status === 'rejected') {
+        setAuthError('Your registration was not approved. Please contact the batch admin.');
+        showAuthOverlay();
+        auth.signOut();
+        return;
+      }
+
+      /* ── Approved: show site ── */
+      hideOverlays();
+      const navUser = document.getElementById('nav-user');
+      navUser.style.display = 'flex';
+      document.getElementById('nav-user-name').textContent = ud.name || user.displayName || user.email;
+      if (ud.role === 'admin' || user.email === ADMIN_EMAIL) {
+        document.getElementById('btn-admin').style.display = '';
+      }
+
+      loadRoster();
+      loadGallery();
+    });
+
+    /* ─────────────────────────────────────────
+       ADMIN PANEL
+    ───────────────────────────────────────── */
+    function openAdminPanel()  { document.getElementById('admin-panel').classList.add('open');    loadAdminUsers(); }
+    function closeAdminPanel() { document.getElementById('admin-panel').classList.remove('open'); }
+
+    async function loadAdminUsers() {
+      const pendingEl  = document.getElementById('admin-pending-list');
+      const approvedEl = document.getElementById('admin-approved-list');
+      pendingEl.innerHTML  = '<p class="lg-empty">Loading…</p>';
+      approvedEl.innerHTML = '<p class="lg-empty">Loading…</p>';
+
+      const snap = await db.collection('users').get();
+      const pending = [], approved = [];
+      snap.forEach(d => {
+        const u = { id: d.id, ...d.data() };
+        if (u.status === 'pending')  pending.push(u);
+        if (u.status === 'approved') approved.push(u);
+      });
+
+      pendingEl.innerHTML  = pending.length  ? '' : '<p class="lg-empty">No pending registrations.</p>';
+      approvedEl.innerHTML = approved.length ? '' : '<p class="lg-empty">No approved members yet.</p>';
+      pending.forEach(u  => pendingEl.appendChild(makeUserRow(u, true)));
+      approved.forEach(u => approvedEl.appendChild(makeUserRow(u, false)));
+    }
+
+    function makeUserRow(u, showActions) {
+      const row = document.createElement('div');
+      row.className = 'admin-user-row';
+      row.innerHTML = `
+        <div class="admin-user-info">
+          <span class="admin-user-name">${u.name || '—'}</span>
+          <span class="admin-user-email">${u.email}</span>
+          ${u.section ? `<span class="admin-user-section">LG 4${u.section}</span>` : ''}
+        </div>
+        ${showActions
+          ? `<div class="admin-user-actions">
+               <button class="btn-approve" onclick="approveUser('${u.id}','${u.name}','${u.section}')">Approve</button>
+               <button class="btn-reject"  onclick="rejectUser('${u.id}')">Reject</button>
+             </div>`
+          : `<span style="font-size:0.68rem;color:#4ade80;letter-spacing:0.1em;text-transform:uppercase;">Approved</span>`
+        }`;
+      return row;
+    }
+
+    async function approveUser(uid, name, section) {
+      await db.collection('users').doc(uid).update({ status: 'approved' });
+      if (section) await saveNameToFirestore(section, name);
+      loadAdminUsers();
+    }
+
+    async function rejectUser(uid) {
+      await db.collection('users').doc(uid).update({ status: 'rejected' });
+      loadAdminUsers();
+    }
+
+    /* ─────────────────────────────────────────
+       ROSTER  (Firestore)
+    ───────────────────────────────────────── */
+    function addNameToRoster(section, name) {
+      const panel = document.getElementById('lg-' + section);
+      if (!panel) return;
+      const roster = panel.querySelector('.lg-roster');
+      const ph = roster.querySelector('.lg-empty');
+      if (ph) ph.remove();
+      const card = document.createElement('div');
+      card.className = 'lg-name-card';
+      card.textContent = name;
+      roster.appendChild(card);
+    }
+
+    async function loadRoster() {
+      const snap = await db.collection('roster').get();
+      snap.forEach(doc => {
+        (doc.data().names || []).forEach(name => addNameToRoster(doc.id, name));
+      });
+    }
+
+    async function saveNameToFirestore(section, name) {
+      await db.collection('roster').doc(section).set(
+        { names: firebase.firestore.FieldValue.arrayUnion(name) },
+        { merge: true }
+      );
+      addNameToRoster(section, name);
+    }
+
+    /* ─────────────────────────────────────────
+       GALLERY  (Firebase Storage + Firestore)
+    ───────────────────────────────────────── */
+    function addPhotoToGallery(src, caption) {
+      const grid = document.querySelector('.gallery-grid');
+      const ph = grid.querySelector('.gallery-placeholder');
+      if (ph) {
+        const item = ph.closest('.gallery-item');
+        item.innerHTML = `<img src="${src}" alt="${caption}" /><div class="gallery-caption">${caption}</div>`;
+      } else {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `<img src="${src}" alt="${caption}" /><div class="gallery-caption">${caption}</div>`;
+        grid.appendChild(item);
+      }
+    }
+
+    async function loadGallery() {
+      try {
+        const snap = await db.collection('gallery').orderBy('createdAt').get();
+        snap.forEach(doc => {
+          const { url, caption } = doc.data();
+          addPhotoToGallery(url, caption);
+        });
+      } catch (e) { console.warn('Gallery load error:', e); }
+    }
+
+    document.getElementById('photoUpload').addEventListener('change', async function () {
+      const user = auth.currentUser;
+      if (!user) return;
+      for (const file of Array.from(this.files)) {
+        const caption = file.name.replace(/\.[^/.]+$/, '');
+        const ref = storage.ref(`gallery/${Date.now()}_${file.name}`);
+        try {
+          await ref.put(file);
+          const url = await ref.getDownloadURL();
+          addPhotoToGallery(url, caption);
+          await db.collection('gallery').add({
+            url, caption,
+            addedBy: user.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } catch (e) { console.warn('Upload error:', e); }
+      }
+      this.value = '';
+    });
+
+    /* ─────────────────────────────────────────
+       CONTACT FORM
+    ───────────────────────────────────────── */
     function handleSubmit(e) {
       e.preventDefault();
       const btn = e.target.querySelector('.btn-submit');
@@ -1222,8 +2067,11 @@
       }, 3000);
     }
 
-    const menuBtn   = document.getElementById('menuBtn');
-    const navLinks  = document.getElementById('navLinks');
+    /* ─────────────────────────────────────────
+       NAV / MENU
+    ───────────────────────────────────────── */
+    const menuBtn  = document.getElementById('menuBtn');
+    const navLinks = document.getElementById('navLinks');
 
     function closeMenu() {
       menuBtn.classList.remove('open');
@@ -1240,30 +2088,55 @@
       if (!hash || hash === '#') hash = '#home';
       const target = document.querySelector(hash);
       if (!target) return;
-
-      document.querySelectorAll('section').forEach(s => {
-        s.classList.remove('active');
-        s.scrollTop = 0;
-      });
+      document.querySelectorAll('section').forEach(s => { s.classList.remove('active'); s.scrollTop = 0; });
       target.classList.add('active');
-
       document.querySelectorAll('.nav-links a').forEach(a => {
         a.classList.toggle('nav-active', a.getAttribute('href') === hash);
       });
-
       closeMenu();
     }
 
+    /* ─────────────────────────────────────────
+       LG TABS
+    ───────────────────────────────────────── */
+    document.querySelectorAll('.lg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lg-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.lg-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('lg-' + btn.dataset.lg).classList.add('active');
+      });
+    });
+
+    /* ─────────────────────────────────────────
+       LIGHTBOX
+    ───────────────────────────────────────── */
+    const lightbox    = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+
+    function openLightbox(src, alt) { lightboxImg.src = src; lightboxImg.alt = alt; lightbox.classList.add('open'); }
+    function closeLightbox() { lightbox.classList.remove('open'); }
+
+    document.querySelector('.gallery-grid').addEventListener('click', function (e) {
+      const img = e.target.closest('.gallery-item')?.querySelector('img');
+      if (img) openLightbox(img.src, img.alt);
+    });
+
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    /* ─────────────────────────────────────────
+       NAV LINKS
+    ───────────────────────────────────────── */
     document.querySelectorAll('a[href^="#"]').forEach(link => {
       link.addEventListener('click', e => {
         const href = link.getAttribute('href');
-        if (href && href.length > 1) {
-          e.preventDefault();
-          showSection(href);
-        }
+        if (href && href.length > 1) { e.preventDefault(); showSection(href); }
       });
     });
   </script>
+
 
 </body>
 </html>
