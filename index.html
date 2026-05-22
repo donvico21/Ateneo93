@@ -1293,7 +1293,6 @@
     <div class="nav-user" id="nav-user" style="display:none">
       <span class="nav-user-name" id="nav-user-name"></span>
       <button class="btn-nav-sm admin" id="btn-admin" style="display:none" onclick="openAdminPanel()">Admin</button>
-      <button class="btn-nav-sm" onclick="doSignOut()">Sign Out</button>
     </div>
     <button class="nav-hamburger" id="menuBtn" aria-label="Open menu">
       <span></span><span></span><span></span>
@@ -1304,7 +1303,8 @@
       <li><a href="#officers">Officers</a></li>
       <li><a href="#members">Sections</a></li>
       <li><a href="#gallery">Gallery</a></li>
-      <li id="nav-li-signin"><a href="#" onclick="event.preventDefault(); document.getElementById('auth-overlay').style.display='flex'">Sign In</a></li>
+      <li id="nav-li-signin"><a href="#" onclick="event.preventDefault(); document.getElementById('auth-overlay').style.display='flex'">Sign In / Register</a></li>
+      <li id="nav-li-signout" style="display:none"><a href="#" onclick="event.preventDefault(); doSignOut()">Sign Out</a></li>
     </ul>
   </nav>
 
@@ -1875,8 +1875,9 @@
     auth.onAuthStateChanged(async user => {
       if (!user) {
         hideOverlays();
-        document.getElementById('nav-user').style.display     = 'none';
-        document.getElementById('nav-li-signin').style.display = '';
+        document.getElementById('nav-user').style.display      = 'none';
+        document.getElementById('nav-li-signin').style.display  = '';
+        document.getElementById('nav-li-signout').style.display = 'none';
         return;
       }
 
@@ -1914,13 +1915,15 @@
 
       /* ── Approved ── */
       hideOverlays();
-      document.getElementById('nav-li-signin').style.display = 'none';
+      document.getElementById('nav-li-signin').style.display  = 'none';
+      document.getElementById('nav-li-signout').style.display = '';
       const navUser = document.getElementById('nav-user');
       navUser.style.display = 'flex';
       document.getElementById('nav-user-name').textContent = ud.name || user.displayName || user.email;
       if (ud.role === 'admin' || user.email === ADMIN_EMAIL) {
         document.getElementById('btn-admin').style.display = '';
       }
+      showSection('#connect');
     });
 
     /* Load public data on page load — no login required */
