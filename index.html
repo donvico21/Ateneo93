@@ -130,7 +130,7 @@
 
     .hero-title {
       font-family: 'Cinzel', serif;
-      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-size: clamp(2rem, 5.5vw, 4.5rem);
       font-weight: 900;
       line-height: 1;
       letter-spacing: 0.08em;
@@ -472,6 +472,22 @@
     .gallery-placeholder svg { width: 32px; height: 32px; opacity: 0.4; }
     .gallery-placeholder span { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
 
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--white);
+      background: linear-gradient(to top, rgba(8,12,20,0.85), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .gallery-item:hover .gallery-caption { opacity: 1; }
+
     .gallery-cta {
       text-align: center;
       margin-top: 2rem;
@@ -681,7 +697,7 @@
 
     <div class="hero-content">
       <p class="hero-eyebrow">Ateneo de Naga University</p>
-      <h1 class="hero-title">BATCH <span>'93</span></h1>
+      <h1 class="hero-title">Ateneo De Naga<br/>High School <span>'93</span></h1>
       <p class="hero-subtitle">High School Alumni</p>
       <div class="hero-divider"></div>
       <p class="hero-tagline">Brothers forged in faith, honor, and excellence — forever united in the Blue and Gold.</p>
@@ -790,24 +806,14 @@
           <img src="banner.jpg" alt="ADNU HS Batch 93 Banner" />
         </div>
 
-        <!-- Placeholder slots -->
+        <!-- Batch photos -->
         <div class="gallery-item">
-          <div class="gallery-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="M21 15l-5-5L5 21"/>
-            </svg>
-            <span>Add Photo</span>
-          </div>
+          <img src="vandals.jpg" alt="Batch '93 Vandals Wall" />
+          <div class="gallery-caption">The Vandals Wall</div>
         </div>
         <div class="gallery-item">
-          <div class="gallery-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="M21 15l-5-5L5 21"/>
-            </svg>
-            <span>Add Photo</span>
-          </div>
+          <img src="reunion 2005.jpg" alt="Batch '93 Reunion 2005" />
+          <div class="gallery-caption">Reunion 2005</div>
         </div>
         <div class="gallery-item">
           <div class="gallery-placeholder">
