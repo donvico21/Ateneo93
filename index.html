@@ -1290,7 +1290,7 @@
   <!-- NAV -->
   <nav>
     <a class="nav-brand" href="#home">ADNU H.S. '93</a>
-    <div class="nav-user" id="nav-user">
+    <div class="nav-user" id="nav-user" style="display:none">
       <span class="nav-user-name" id="nav-user-name"></span>
       <button class="btn-nav-sm admin" id="btn-admin" style="display:none" onclick="openAdminPanel()">Admin</button>
       <button class="btn-nav-sm" onclick="doSignOut()">Sign Out</button>
@@ -1304,7 +1304,7 @@
       <li><a href="#officers">Officers</a></li>
       <li><a href="#members">Sections</a></li>
       <li><a href="#gallery">Gallery</a></li>
-      <li><a href="#connect">Connect</a></li>
+      <li id="nav-li-signin"><a href="#" onclick="event.preventDefault(); document.getElementById('auth-overlay').style.display='flex'">Sign In</a></li>
     </ul>
   </nav>
 
@@ -1611,7 +1611,7 @@
       </div>
 
       <div class="gallery-cta">
-        <button class="hero-cta" style="margin-top:0;" onclick="document.getElementById('photoUpload').click()">Share Your Photos</button>
+        <button class="hero-cta" style="margin-top:0;" onclick="requireAuthThenUpload()">Share Your Photos</button>
         <input type="file" id="photoUpload" accept="image/*" multiple style="display:none" />
       </div>
     </div>
@@ -1812,21 +1812,17 @@
       document.getElementById('auth-error').textContent = msg;
     }
 
-    function showAuthOverlay() {
-      document.getElementById('auth-overlay').style.display    = 'flex';
-      document.getElementById('pending-overlay').style.display = 'none';
-      document.getElementById('nav-user').style.display        = 'none';
-    }
-
-    function showPendingOverlay() {
-      document.getElementById('auth-overlay').style.display    = 'none';
-      document.getElementById('pending-overlay').style.display = 'flex';
-      document.getElementById('nav-user').style.display        = 'none';
-    }
-
     function hideOverlays() {
       document.getElementById('auth-overlay').style.display    = 'none';
       document.getElementById('pending-overlay').style.display = 'none';
+    }
+
+    function requireAuthThenUpload() {
+      if (auth.currentUser) {
+        document.getElementById('photoUpload').click();
+      } else {
+        document.getElementById('auth-overlay').style.display = 'flex';
+      }
     }
 
     /* ─────────────────────────────────────────
@@ -1874,10 +1870,15 @@
     function doSignOut() { auth.signOut(); }
 
     /* ─────────────────────────────────────────
-       AUTH STATE LISTENER  — drives everything
+       AUTH STATE LISTENER
     ───────────────────────────────────────── */
     auth.onAuthStateChanged(async user => {
-      if (!user) { showAuthOverlay(); return; }
+      if (!user) {
+        hideOverlays();
+        document.getElementById('nav-user').style.display     = 'none';
+        document.getElementById('nav-li-signin').style.display = '';
+        return;
+      }
 
       const userRef = db.collection('users').doc(user.uid);
       let snap = await userRef.get();
@@ -1897,27 +1898,34 @@
 
       const ud = snap.data();
 
-      if (ud.status === 'pending') { showPendingOverlay(); return; }
+      if (ud.status === 'pending') {
+        document.getElementById('pending-overlay').style.display = 'flex';
+        document.getElementById('auth-overlay').style.display    = 'none';
+        document.getElementById('nav-li-signin').style.display   = 'none';
+        return;
+      }
 
       if (ud.status === 'rejected') {
         setAuthError('Your registration was not approved. Please contact the batch admin.');
-        showAuthOverlay();
+        document.getElementById('auth-overlay').style.display = 'flex';
         auth.signOut();
         return;
       }
 
-      /* ── Approved: show site ── */
+      /* ── Approved ── */
       hideOverlays();
+      document.getElementById('nav-li-signin').style.display = 'none';
       const navUser = document.getElementById('nav-user');
       navUser.style.display = 'flex';
       document.getElementById('nav-user-name').textContent = ud.name || user.displayName || user.email;
       if (ud.role === 'admin' || user.email === ADMIN_EMAIL) {
         document.getElementById('btn-admin').style.display = '';
       }
-
-      loadRoster();
-      loadGallery();
     });
+
+    /* Load public data on page load — no login required */
+    loadRoster();
+    loadGallery();
 
     /* ─────────────────────────────────────────
        ADMIN PANEL
